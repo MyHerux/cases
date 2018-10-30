@@ -1,0 +1,6 @@
+server:
+  port: 8082
+
+test3:
+  name: test3
+  id: 3
