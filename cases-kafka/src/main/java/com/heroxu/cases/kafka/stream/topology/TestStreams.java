@@ -12,14 +12,17 @@
 //import org.apache.kafka.streams.StreamsConfig;
 //import org.apache.kafka.streams.kstream.*;
 //
-//
+//import java.time.Duration;
 //import java.util.Properties;
 //import java.util.concurrent.CountDownLatch;
 //
+//import static org.apache.kafka.streams.kstream.Suppressed.BufferConfig.unbounded;
+//import static org.apache.kafka.streams.kstream.Suppressed.untilWindowCloses;
 //
-//public class WordCountApplication {
+//public class TestStreams {
 //
 //    public static void main(String[] args) {
+//
 //        Properties props = new Properties();
 //        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams");
 //        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
@@ -34,11 +37,56 @@
 //
 //        StreamsBuilder builder = new StreamsBuilder();
 //
-//        KStream<String, String> source = builder.stream("RDS");
-//        String storeName = "rds-store";
+//        //KStream<String, String> source = builder.stream("RDS");
+//
+//        //covertToWindowCount(source);
+//
 //        Serde<Windowed<String>> windowedSerde = Serdes.serdeFrom(new TimeWindowedSerializer(new StringSerializer()), new TimeWindowedDeserializer(new StringDeserializer()));
 //
-//        covertToWindowCount(source);
+//
+//        KStream<byte[], String> stream = null;
+//
+//
+//        builder.stream("RDS")
+//                .filter((k, v) -> v != null)
+//                .map((k, v) -> {
+//                    JSONObject data = null;
+//                    try {
+//                        data = JSONObject.parseObject(v.toString()).getJSONArray("Data").getJSONObject(0);
+//                    } catch (Exception e) {
+//                        System.out.println("----: " + v);
+//                    }
+//
+//                    if (data == null) {
+//                        return new KeyValue<>(null, null);
+//                    } else {
+//                        return new KeyValue<>(data.getString("workerOid"), data.toJSONString());
+//                    }
+//                })
+//                .filter((k, v) -> v != null)
+//                .groupBy((k, v) -> k, Serialized.with(Serdes.String(), Serdes.String()))
+//                .windowedBy(TimeWindows.of(Duration.ofMinutes(5)).advanceBy(Duration.ofMinutes(1)).grace(Duration.ofSeconds(5)))
+//                .aggregate(String::new, (aggKey, newValue, aggValue) -> {
+//                    Long hs_5m = 0L;
+//                    if (aggValue != null) {
+//                        JSONObject x = JSONObject.parseObject(aggValue);
+//                        if (x != null) {
+//                            hs_5m = Long.valueOf(x.getOrDefault("hs_5m", 0).toString());
+//                        }
+//                    }
+//                    Long hs = JSONObject.parseObject(newValue).getLongValue("hs");
+//
+//                    JSONObject data = new JSONObject();
+//                    data.put("workerOid", aggKey);
+//                    data.put("hs_5m", hs_5m + hs);
+//                    return data.toJSONString();
+//                })
+//                .suppress(untilWindowCloses(unbounded()))
+//                .toStream()
+//                .map((k, v) -> new KeyValue<>(k.key(), v))
+//                .to("streams-output", Produced.with(Serdes.String(), Serdes.String()));
+//
+//        //coverToWindowFinal(builder);
 //
 //        final KafkaStreams streams = new KafkaStreams(builder.build(), props);
 //        final CountDownLatch latch = new CountDownLatch(1);
@@ -61,6 +109,32 @@
 //        System.exit(0);
 //    }
 //
+//    private static void coverToWindowFinal(StreamsBuilder builder) {
+//        builder.stream("RDS")
+//                .filter((k, v) -> v != null)
+//                .map((k, v) -> {
+//                    JSONObject data = null;
+//                    try {
+//                        data = JSONObject.parseObject(v.toString()).getJSONArray("Data").getJSONObject(0);
+//                    } catch (Exception e) {
+//                        System.out.println("----: " + v);
+//                    }
+//
+//                    if (data == null) {
+//                        return new KeyValue<>(null, null);
+//                    } else {
+//                        return new KeyValue<>(data.getString("workerOid"), data.toJSONString());
+//                    }
+//                })
+//                .filter((k, v) -> v != null)
+//                .groupBy((k, v) -> k, Serialized.with(Serdes.String(), Serdes.String()))
+//                .windowedBy(TimeWindows.of(Duration.ofMinutes(5)).advanceBy(Duration.ofMinutes(1)).grace(Duration.ofSeconds(5)))
+//                .count()
+//                .suppress(untilWindowCloses(unbounded()))
+//                .toStream()
+//                .map((k, v) -> new KeyValue<>(k.key(), v.toString()))
+//                .to("streams-output", Produced.with(Serdes.String(), Serdes.String()));
+//    }
 //
 //    // Tumbling time windows
 //    private static void covertToWindowCount(KStream<String, String> source) {
@@ -91,36 +165,5 @@
 //            return k.toString();
 //        }).to("streams-output", Produced.with(Serdes.String(), Serdes.String()));
 //    }
-//
-//    // Hopping time windows
-//    private static void covertToWindowCount2(KStream<String, String> source) {
-//        long windowSizeMs = 5 * 60 * 1000;
-//        long advanceSizeMs = 60 * 1000;
-//        KTable<Windowed<String>, Long> kTable = source.filter((k, v) -> v != null)
-//                .map((k, v) -> {
-//                    JSONObject data = null;
-//                    try {
-//                        data = JSONObject.parseObject(v).getJSONArray("Data").getJSONObject(0);
-//                    } catch (Exception e) {
-//                        System.out.println("----: " + v);
-//                    }
-//
-//                    if (data == null) {
-//                        return new KeyValue<>(null, null);
-//                    } else {
-//                        return new KeyValue<>(data.getString("workerOid"), data.toJSONString());
-//                    }
-//                })
-//                .filter((k, v) -> v != null)
-//                .groupByKey()
-//                .windowedBy(TimeWindows.of(windowSizeMs).advanceBy(advanceSizeMs))
-//                .count();
-//
-//        kTable.mapValues(Object::toString).toStream((k, v) -> {
-//            System.out.println(k + v);
-//            return k.toString();
-//        }).to("streams-output", Produced.with(Serdes.String(), Serdes.String()));
-//    }
-//
 //
 //}
