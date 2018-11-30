@@ -1,0 +1,20 @@
+{
+    "eventFrequency":1000,
+    "varyEventFrequency":true,
+    "repeatWorkflow":true,
+    "timeBetweenRepeat":1000,
+    "varyRepeatFrequency":true,
+    "steps":[
+        {
+            "config":[
+                {
+                    "itemName":"iphone",
+                    "address":"BJ",
+                    "type":"phone",
+                    "price":"5388.88"
+                }
+            ],
+            "duration":0
+        }
+    ]
+}
