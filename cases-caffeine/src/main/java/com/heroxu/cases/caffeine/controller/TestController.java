@@ -20,4 +20,9 @@ public class TestController {
     public int getTestB(){
         return testService.testB();
     }
+
+    @GetMapping(value = "/test_c")
+    public String getTestC(){
+        return testService.testC();
+    }
 }

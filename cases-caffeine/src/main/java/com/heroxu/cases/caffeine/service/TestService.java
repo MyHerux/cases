@@ -20,4 +20,10 @@ public class TestService {
         return 99;
     }
 
+    @Cacheable(cacheNames = "TEST_A")
+    public String testC(){
+        log.info("testC not get from cache!");
+        return "testC";
+    }
+
 }
