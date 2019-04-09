@@ -1,3 +1,11 @@
+
+spring:
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+#    locations: classpath:/db.migration
+
+
 app:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
@@ -6,10 +14,3 @@ app:
     username: root
     password: 1234
     maximum-pool-size: 30
-
-
-spring:
-  flyway:
-    enabled: true
-    baseline-on-migrate: true
-    locations: classpath:/db.migration

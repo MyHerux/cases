@@ -29,6 +29,7 @@
         <module>cases-kafka</module>
         <module>cases-caffeine</module>
         <module>cases-flyway</module>
+        <module>cases-cas</module>
     </modules>
 
     <dependencyManagement>
