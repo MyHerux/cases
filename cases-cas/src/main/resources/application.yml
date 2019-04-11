@@ -1,8 +1,9 @@
 cas:
-  server-url-prefix: http://localhost:8080/cas
-  server-login-url: http://localhost:8080/cas/login
+  server-url-prefix: http://server-url
+  server-login-url: http://server-url/login
   client-host-url: http://localhost:9100
   validation-type: cas
+  authentication-url-patterns:
 
 server:
   port: 9100
