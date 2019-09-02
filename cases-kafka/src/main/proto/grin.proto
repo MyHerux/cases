@@ -1,0 +1,26 @@
+syntax="proto2";
+package sharebase;
+
+option java_package = "com.heroxu.cases.kafka.proto.sharebase";
+option java_outer_classname = "GrinMsgProto";
+
+
+message GrinMsg{
+  required uint32 version = 1; //协议版本
+  optional sint64 workerhashid = 2;//矿机唯一id
+  optional sint32 userid = 3;//用户唯一id，(可忽略)
+  optional sint32 status = 4;//share状态
+  optional sint64 timestamp = 5;//share提交时间
+  optional string ip = 6;//矿机ip
+  optional uint64 jobid = 7;//本次提交对应的任务编号
+  optional uint64 sharediff = 8;//下发任务难度
+  optional uint64 blockdiff = 9;//网络难度
+  optional uint64 height = 10;//任务区块高度
+  optional uint64 nonce = 11;//grin的nonce字段
+  optional uint32 sessionid = 12;//矿机连接的session编号
+  optional uint32 edgebits = 13;
+  optional uint32 scaling = 14;
+  optional uint64 hashprefix = 15;
+  optional string username = 16;//矿机所属用户名(子账户名/挖矿地址)
+  optional string workername = 17;//矿机名
+}

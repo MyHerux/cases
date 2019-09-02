@@ -58,7 +58,7 @@ public class LocalCacheConfig {
      */
     @Bean
     @Primary
-    public CacheManager caffeineCacheManager() {
+    public CacheManager MyCaffeineCacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
 
         List<CaffeineCache> caches = new ArrayList<>();
