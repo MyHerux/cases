@@ -31,6 +31,7 @@
         <module>cases-flyway</module>
         <module>cases-cas</module>
         <module>cases-algorithm</module>
+        <module>cases-cache</module>
     </modules>
 
     <dependencyManagement>
